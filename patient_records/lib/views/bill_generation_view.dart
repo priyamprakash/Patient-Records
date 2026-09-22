@@ -9,6 +9,10 @@ import '../services/clinic_repository.dart';
 import '../theme/app_theme.dart';
 import '../theme/glass_card.dart';
 
+enum DiscountType { flat, percentage }
+
+enum BillingCategory { consultation, diagnostic }
+
 class BillGenerationView extends StatefulWidget {
   final Patient? preselectedPatient;
 
@@ -23,15 +27,24 @@ class _BillGenerationViewState extends State<BillGenerationView> {
 
   Patient? _selectedPatient;
   final List<BillItem> _items = [];
-  double _discount = 0.0;
+
+  // Discount configuration (% or ₹)
+  DiscountType _discountType = DiscountType.flat;
+  double _discountInput = 0.0;
+
   double _tax = 0.0;
   String _paymentStatus = 'Paid';
   String _paymentMethod = 'UPI';
+
+  // Preset & Custom item category
+  BillingCategory _selectedCategory = BillingCategory.consultation;
+  BillingCategory _newItemCategory = BillingCategory.consultation;
 
   // Temporary line item inputs
   final _descController = TextEditingController();
   final _qtyController = TextEditingController(text: '1');
   final _priceController = TextEditingController(text: '500');
+  final _discountController = TextEditingController();
 
   @override
   void initState() {
@@ -55,6 +68,7 @@ class _BillGenerationViewState extends State<BillGenerationView> {
     _descController.dispose();
     _qtyController.dispose();
     _priceController.dispose();
+    _discountController.dispose();
     super.dispose();
   }
 
@@ -70,10 +84,12 @@ class _BillGenerationViewState extends State<BillGenerationView> {
       return;
     }
 
+    final categoryPrefix = _newItemCategory == BillingCategory.diagnostic ? '[Diagnostic] ' : '';
+
     setState(() {
       _items.add(BillItem(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        description: desc,
+        description: '$categoryPrefix$desc',
         quantity: qty,
         unitPrice: price,
       ));
@@ -83,11 +99,12 @@ class _BillGenerationViewState extends State<BillGenerationView> {
     });
   }
 
-  void _addQuickPreset(String name, double price) {
+  void _addQuickPreset(String name, double price, {bool isDiagnostic = false}) {
+    final prefix = isDiagnostic ? '[Diagnostic] ' : '';
     setState(() {
       _items.add(BillItem(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        description: name,
+        description: '$prefix$name',
         quantity: 1,
         unitPrice: price,
       ));
@@ -95,7 +112,17 @@ class _BillGenerationViewState extends State<BillGenerationView> {
   }
 
   double get subtotal => _items.fold(0.0, (sum, item) => sum + item.totalPrice);
-  double get total => (subtotal - _discount) + _tax > 0 ? (subtotal - _discount) + _tax : 0.0;
+
+  double get computedDiscount {
+    if (_discountType == DiscountType.percentage) {
+      final calculated = (subtotal * _discountInput) / 100.0;
+      return calculated > subtotal ? subtotal : calculated;
+    } else {
+      return _discountInput > subtotal ? subtotal : _discountInput;
+    }
+  }
+
+  double get total => (subtotal - computedDiscount) + _tax > 0 ? (subtotal - computedDiscount) + _tax : 0.0;
 
   Future<void> _generateAndShowBill() async {
     if (_selectedPatient == null) {
@@ -117,7 +144,7 @@ class _BillGenerationViewState extends State<BillGenerationView> {
       patientName: _selectedPatient!.name,
       patientPhone: _selectedPatient!.phone,
       items: _items,
-      discount: _discount,
+      discount: computedDiscount,
       tax: _tax,
       paymentStatus: _paymentStatus,
       paymentMethod: _paymentMethod,
@@ -372,56 +399,182 @@ class _BillGenerationViewState extends State<BillGenerationView> {
               ),
               const SizedBox(height: 16),
 
-              // Quick Presets
-              const Text(
-                'Quick Add Services:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
+              const SizedBox(height: 16),
+
+              // Quick Presets Category Switcher
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ActionChip(
-                    label: const Text('Consultation (₹500)', style: TextStyle(fontSize: 11)),
-                    onPressed: () => _addQuickPreset('General Doctor Consultation', 500),
+                  const Text(
+                    'Quick Add Services:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
-                  ActionChip(
-                    label: const Text('ECG (₹400)', style: TextStyle(fontSize: 11)),
-                    onPressed: () => _addQuickPreset('ECG Screening', 400),
-                  ),
-                  ActionChip(
-                    label: const Text('Blood Sugar (₹200)', style: TextStyle(fontSize: 11)),
-                    onPressed: () => _addQuickPreset('Blood Sugar Test', 200),
-                  ),
-                  ActionChip(
-                    label: const Text('Dressing (₹300)', style: TextStyle(fontSize: 11)),
-                    onPressed: () => _addQuickPreset('Wound Care & Dressing', 300),
+                  Row(
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Consultation', style: TextStyle(fontSize: 11)),
+                        selected: _selectedCategory == BillingCategory.consultation,
+                        onSelected: (selected) {
+                          if (selected) setState(() => _selectedCategory = BillingCategory.consultation);
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      ChoiceChip(
+                        label: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.science_outlined, size: 14),
+                            SizedBox(width: 4),
+                            Text('Diagnostic Billing', style: TextStyle(fontSize: 11)),
+                          ],
+                        ),
+                        selected: _selectedCategory == BillingCategory.diagnostic,
+                        selectedColor: AppTheme.primaryTeal.withValues(alpha: 0.2),
+                        onSelected: (selected) {
+                          if (selected) setState(() => _selectedCategory = BillingCategory.diagnostic);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
+              const SizedBox(height: 8),
+
+              // Presets Chips based on Category
+              if (_selectedCategory == BillingCategory.consultation)
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ActionChip(
+                      label: const Text('General Consultation (₹500)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('General Consultation', 500),
+                    ),
+                    ActionChip(
+                      label: const Text('Follow-up Consultation (₹300)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Follow-up Consultation', 300),
+                    ),
+                    ActionChip(
+                      label: const Text('Emergency Consultation (₹800)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Emergency Consultation', 800),
+                    ),
+                    ActionChip(
+                      label: const Text('ECG Screening (₹400)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('ECG Screening', 400),
+                    ),
+                    ActionChip(
+                      label: const Text('Wound Care & Dressing (₹300)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Wound Care & Dressing', 300),
+                    ),
+                  ],
+                )
+              else
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ActionChip(
+                      avatar: const Icon(Icons.bloodtype, size: 14, color: Colors.redAccent),
+                      label: const Text('Blood Sugar Test (₹150)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Fasting Blood Sugar Test', 150, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('CBC Blood Count (₹250)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Complete Blood Count (CBC)', 250, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('Lipid Profile (₹800)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Lipid Profile Panel', 800, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('Thyroid Profile (₹500)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Thyroid Profile (T3, T4, TSH)', 500, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('Liver Test LFT (₹750)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Liver Function Test (LFT)', 750, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('Kidney Test KFT (₹700)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Kidney Function Test (KFT)', 700, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.biotech, size: 14, color: Colors.purple),
+                      label: const Text('HbA1c Sugar (₹550)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('HbA1c Glycated Sugar Test', 550, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science, size: 14, color: AppTheme.primaryTeal),
+                      label: const Text('Urine Analysis (₹200)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Urine Routine Analysis', 200, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.camera_alt, size: 14, color: Colors.blueGrey),
+                      label: const Text('Chest X-Ray (₹500)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Chest X-Ray PA View', 500, isDiagnostic: true),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.monitor_heart, size: 14, color: Colors.blue),
+                      label: const Text('Ultrasound Abdomen (₹1000)', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _addQuickPreset('Ultrasound Abdomen & Pelvis', 1000, isDiagnostic: true),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 16),
 
               // Custom Item Adder
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Add Line Item',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Add Custom Item',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                        SegmentedButton<BillingCategory>(
+                          style: ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 10)),
+                          ),
+                          segments: const [
+                            ButtonSegment(
+                              value: BillingCategory.consultation,
+                              label: Text('General'),
+                            ),
+                            ButtonSegment(
+                              value: BillingCategory.diagnostic,
+                              label: Text('Diagnostic'),
+                            ),
+                          ],
+                          selected: {_newItemCategory},
+                          onSelectionChanged: (set) {
+                            setState(() => _newItemCategory = set.first);
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _descController,
-                      decoration: const InputDecoration(
-                        hintText: 'Item Description (e.g. Medicine name)',
+                      decoration: InputDecoration(
+                        hintText: _newItemCategory == BillingCategory.diagnostic
+                            ? 'Diagnostic Test Name (e.g. Vitamin D3)'
+                            : 'Item Description (e.g. Injection)',
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -443,9 +596,10 @@ class _BillGenerationViewState extends State<BillGenerationView> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: _addItem,
-                          child: const Text('Add'),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text('Add'),
                         ),
                       ],
                     ),
@@ -472,10 +626,35 @@ class _BillGenerationViewState extends State<BillGenerationView> {
                       separatorBuilder: (ctx, idx) => const Divider(height: 8),
                       itemBuilder: (ctx, idx) {
                         final item = _items[idx];
+                        final isDiag = item.description.startsWith('[Diagnostic]');
                         return ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          title: Text(item.description, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                          title: Row(
+                            children: [
+                              if (isDiag) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryTeal.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.3)),
+                                  ),
+                                  child: const Text(
+                                    'LAB',
+                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                  ),
+                                ),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  isDiag ? item.description.replaceFirst('[Diagnostic] ', '') : item.description,
+                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
                           subtitle: Text('Qty: ${item.quantity} × ₹${item.unitPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 11)),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -512,37 +691,89 @@ class _BillGenerationViewState extends State<BillGenerationView> {
                   Text('₹${subtotal.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-              Row(
+              // Discount Section (Supports % and ₹)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(child: Text('Discount (₹):')),
-                  SizedBox(
-                    width: 90,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(hintText: '0'),
-                      onChanged: (val) => setState(() => _discount = double.tryParse(val) ?? 0.0),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Discount:', style: TextStyle(fontWeight: FontWeight.w500)),
+                      SegmentedButton<DiscountType>(
+                        style: ButtonStyle(
+                          visualDensity: VisualDensity.compact,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ),
+                        segments: const [
+                          ButtonSegment(
+                            value: DiscountType.flat,
+                            label: Text('Flat (₹)'),
+                          ),
+                          ButtonSegment(
+                            value: DiscountType.percentage,
+                            label: Text('Percent (%)'),
+                          ),
+                        ],
+                        selected: {_discountType},
+                        onSelectionChanged: (set) {
+                          setState(() {
+                            _discountType = set.first;
+                          });
+                        },
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _discountController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            hintText: _discountType == DiscountType.percentage ? 'Enter % (e.g. 10)' : 'Enter amount in ₹',
+                            suffixText: _discountType == DiscountType.percentage ? '%' : '₹',
+                            isDense: true,
+                          ),
+                          onChanged: (val) {
+                            setState(() {
+                              _discountInput = double.tryParse(val) ?? 0.0;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_discountInput > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _discountType == DiscountType.percentage
+                          ? '${_discountInput.toStringAsFixed(1)}% discount = -₹${computedDiscount.toStringAsFixed(2)}'
+                          : '₹${computedDiscount.toStringAsFixed(2)} discount (${subtotal > 0 ? ((computedDiscount / subtotal) * 100).toStringAsFixed(1) : 0}%)',
+                      style: const TextStyle(fontSize: 11, color: AppTheme.primaryTeal, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
               Row(
                 children: [
                   const Expanded(child: Text('Tax / GST (₹):')),
                   SizedBox(
-                    width: 90,
+                    width: 100,
                     child: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(hintText: '0'),
+                      decoration: const InputDecoration(hintText: '0', isDense: true),
                       onChanged: (val) => setState(() => _tax = double.tryParse(val) ?? 0.0),
                     ),
                   ),
                 ],
               ),
-              const Divider(height: 20),
+              const Divider(height: 24),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
