@@ -416,4 +416,27 @@ class FakeClinicDatabase {
       ),
     ];
   }
+
+  static List<MedicineMaster> getSampleMedicines() {
+    return [
+      MedicineMaster(id: 'MED-101', name: 'Paracetamol 500mg', type: 'Tablet', defaultDosage: '500mg', defaultFrequency: '1-0-1', defaultDuration: '5 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-102', name: 'Dolo 650mg', type: 'Tablet', defaultDosage: '650mg', defaultFrequency: '1-0-1', defaultDuration: '3 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-103', name: 'Amoxicillin 500mg', type: 'Capsule', defaultDosage: '500mg', defaultFrequency: '1-0-1', defaultDuration: '5 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-104', name: 'Azithromycin 500mg', type: 'Tablet', defaultDosage: '500mg', defaultFrequency: '1-0-0', defaultDuration: '3 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-105', name: 'Cetirizine 10mg', type: 'Tablet', defaultDosage: '10mg', defaultFrequency: '0-0-1', defaultDuration: '5 days', defaultInstructions: 'At bedtime'),
+      MedicineMaster(id: 'MED-106', name: 'Pantoprazole 40mg', type: 'Tablet', defaultDosage: '40mg', defaultFrequency: '1-0-0', defaultDuration: '7 days', defaultInstructions: '30 mins before food'),
+      MedicineMaster(id: 'MED-118', name: 'Refresh Tears Eye Drops', type: 'Drops', defaultDosage: '2 drops', defaultFrequency: '1-1-1', defaultDuration: '7 days', defaultInstructions: 'Instill into eyes'),
+      MedicineMaster(id: 'MED-107', name: 'Metformin 500mg', type: 'Tablet', defaultDosage: '500mg', defaultFrequency: '1-0-1', defaultDuration: '30 days', defaultInstructions: 'With meals'),
+      MedicineMaster(id: 'MED-108', name: 'Telmisartan 40mg', type: 'Tablet', defaultDosage: '40mg', defaultFrequency: '1-0-0', defaultDuration: '30 days', defaultInstructions: 'Morning'),
+      MedicineMaster(id: 'MED-109', name: 'Atorvastatin 10mg', type: 'Tablet', defaultDosage: '10mg', defaultFrequency: '0-0-1', defaultDuration: '30 days', defaultInstructions: 'At bedtime'),
+      MedicineMaster(id: 'MED-110', name: 'Ibuprofen 400mg', type: 'Tablet', defaultDosage: '400mg', defaultFrequency: '1-0-1', defaultDuration: '3 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-111', name: 'Cofsys Cough Syrup 100ml', type: 'Syrup', defaultDosage: '10ml', defaultFrequency: '1-1-1', defaultDuration: '5 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-112', name: 'Zincovit Multivitamin', type: 'Tablet', defaultDosage: '1 tab', defaultFrequency: '1-0-0', defaultDuration: '30 days', defaultInstructions: 'After food'),
+      MedicineMaster(id: 'MED-113', name: 'Omeprazole 20mg', type: 'Capsule', defaultDosage: '20mg', defaultFrequency: '1-0-0', defaultDuration: '7 days', defaultInstructions: 'Before food'),
+      MedicineMaster(id: 'MED-114', name: 'Montelukast 10mg', type: 'Tablet', defaultDosage: '10mg', defaultFrequency: '0-0-1', defaultDuration: '10 days', defaultInstructions: 'At bedtime'),
+      MedicineMaster(id: 'MED-115', name: 'Amlodipine 5mg', type: 'Tablet', defaultDosage: '5mg', defaultFrequency: '1-0-0', defaultDuration: '30 days', defaultInstructions: 'Morning'),
+      MedicineMaster(id: 'MED-116', name: 'ORS Powder Sachet', type: 'Sachet', defaultDosage: '1 sachet', defaultFrequency: 'As needed', defaultDuration: '2 days', defaultInstructions: 'Drink frequently'),
+      MedicineMaster(id: 'MED-117', name: 'Betadine Ointment 15g', type: 'Ointment', defaultDosage: 'Topical', defaultFrequency: '1-0-1', defaultDuration: '5 days', defaultInstructions: 'Apply on clean wound'),
+    ];
+  }
 }

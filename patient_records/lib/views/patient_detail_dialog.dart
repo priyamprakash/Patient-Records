@@ -170,11 +170,41 @@ class PatientDetailDialog extends StatelessWidget {
                                                 ),
                                               ],
                                             ),
-                                            if (v.diagnosis.isNotEmpty) ...[
+                                            if (v.vitals != null && !v.vitals!.isEmpty) ...[
                                               const SizedBox(height: 4),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.teal.shade50,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  'Vitals: ${v.vitals!.summaryText}',
+                                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                ),
+                                              ),
+                                            ],
+                                            if (v.diagnosis.isNotEmpty) ...[
+                                              const SizedBox(height: 6),
                                               Text('Diagnosis: ${v.diagnosis}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                                             ],
-                                            if (v.prescription.isNotEmpty) ...[
+                                            if (v.medicines.isNotEmpty) ...[
+                                              const SizedBox(height: 6),
+                                              const Text('Prescribed Medicines:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                              const SizedBox(height: 4),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: v.medicines.map((m) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets.only(left: 8, bottom: 2),
+                                                    child: Text(
+                                                      '• ${m.displayText}',
+                                                      style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ] else if (v.prescription.isNotEmpty) ...[
                                               const SizedBox(height: 4),
                                               Text('Prescription: ${v.prescription}', style: TextStyle(color: Colors.grey.shade800, fontSize: 12)),
                                             ],

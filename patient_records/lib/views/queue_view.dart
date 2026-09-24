@@ -5,6 +5,7 @@ import '../services/clinic_repository.dart';
 import '../theme/app_theme.dart';
 import '../theme/glass_card.dart';
 import 'patient_detail_dialog.dart';
+import 'prescription_consultation_dialog.dart';
 
 class QueueView extends StatefulWidget {
   final VoidCallback? onNavigateToAddPatient;
@@ -18,113 +19,8 @@ class QueueView extends StatefulWidget {
 class _QueueViewState extends State<QueueView> {
   final _repository = ClinicRepository();
 
-  void _showAttendDialog(QueueItem item) {
-    final diagnosisCtrl = TextEditingController();
-    final prescriptionCtrl = TextEditingController();
-    final notesCtrl = TextEditingController();
-    final feeCtrl = TextEditingController(text: '500');
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Attend Patient: ${item.patientName}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        content: SizedBox(
-          width: 500,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (item.chiefComplaint.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.amber.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.info_outline, color: Colors.amber, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Complaint: ${item.chiefComplaint}',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.amber.shade900, fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-                TextField(
-                  controller: diagnosisCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Diagnosis *',
-                    hintText: 'e.g. Viral Fever, Mild Bronchitis',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: prescriptionCtrl,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Prescription',
-                    hintText: 'e.g. Tab Paracetamol 500mg TDS',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: notesCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Doctor Advice / Notes',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: feeCtrl,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Consultation Fee (₹)',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.check_circle_outline),
-            label: const Text('Complete Visit'),
-            onPressed: () async {
-              final fee = double.tryParse(feeCtrl.text) ?? 500.0;
-              await _repository.attendPatient(
-                queueItem: item,
-                diagnosis: diagnosisCtrl.text.trim(),
-                prescription: prescriptionCtrl.text.trim(),
-                notes: notesCtrl.text.trim(),
-                fee: fee,
-              );
-              if (mounted && ctx.mounted) {
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${item.patientName} marked as Attended!'),
-                    backgroundColor: AppTheme.primaryTeal,
-                  ),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
+  void _openPrescriptionConsultation(QueueItem item) {
+    PrescriptionConsultationDialog.show(context, item);
   }
 
   @override
@@ -226,204 +122,229 @@ class _QueueViewState extends State<QueueView> {
                       itemBuilder: (context, index) {
                         final item = queue[index];
                         final isConsulting = item.status == 'inConsultation';
+                        final hasVitals = item.vitals != null && !item.vitals!.isEmpty;
 
-                        return GlassCard(
-                          borderColor: isConsulting ? AppTheme.statusInConsultation : Colors.teal.shade100,
-                          backgroundColor: isConsulting
-                              ? Colors.blue.shade50.withValues(alpha: 0.9)
-                              : Colors.white.withValues(alpha: 0.9),
-                          padding: EdgeInsets.all(isMobile ? 12 : 16),
-                          child: isMobile
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            gradient: isConsulting
-                                                ? const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)])
-                                                : AppTheme.primaryGradient,
-                                            borderRadius: BorderRadius.circular(20),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: (isConsulting ? AppTheme.statusInConsultation : AppTheme.primaryTeal).withValues(alpha: 0.3),
-                                                blurRadius: 6,
+                        return InkWell(
+                          onTap: () => _openPrescriptionConsultation(item),
+                          borderRadius: BorderRadius.circular(16),
+                          child: GlassCard(
+                            borderColor: isConsulting ? AppTheme.statusInConsultation : Colors.teal.shade100,
+                            backgroundColor: isConsulting
+                                ? Colors.blue.shade50.withValues(alpha: 0.9)
+                                : Colors.white.withValues(alpha: 0.9),
+                            padding: EdgeInsets.all(isMobile ? 12 : 16),
+                            child: isMobile
+                                ? Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              gradient: isConsulting
+                                                  ? const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)])
+                                                  : AppTheme.primaryGradient,
+                                              borderRadius: BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: (isConsulting ? AppTheme.statusInConsultation : AppTheme.primaryTeal).withValues(alpha: 0.3),
+                                                  blurRadius: 6,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Text(
+                                              'TOKEN #${item.tokenNumber}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 12,
                                               ),
-                                            ],
+                                            ),
+                                          ),
+                                          _buildStatusBadge(isConsulting),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        item.patientName,
+                                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.secondaryNavy),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Phone: ${item.patientPhone} • Added: ${dateFormat.format(item.timeAdded)}',
+                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                      ),
+                                      if (item.chiefComplaint.isNotEmpty) ...[
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber.shade50,
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: Colors.amber.shade200),
                                           ),
                                           child: Text(
-                                            'TOKEN #${item.tokenNumber}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 12,
-                                            ),
+                                            'Complaint: ${item.chiefComplaint}',
+                                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
                                           ),
                                         ),
-                                        _buildStatusBadge(isConsulting),
                                       ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      item.patientName,
-                                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppTheme.secondaryNavy),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'Phone: ${item.patientPhone} • Added: ${dateFormat.format(item.timeAdded)}',
-                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                    ),
-                                    if (item.chiefComplaint.isNotEmpty) ...[
-                                      const SizedBox(height: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.shade50,
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: Colors.amber.shade200),
-                                        ),
-                                        child: Text(
-                                          'Complaint: ${item.chiefComplaint}',
-                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.amber.shade900),
-                                        ),
-                                      ),
-                                    ],
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.info_outline, color: AppTheme.primaryTeal),
-                                          onPressed: () {
-                                            final patient = _repository.getPatientById(item.patientId);
-                                            if (patient != null) {
-                                              PatientDetailDialog.show(context, patient);
-                                            }
-                                          },
-                                        ),
-                                        const SizedBox(width: 8),
-                                        if (!isConsulting)
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppTheme.statusInConsultation,
-                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                              shape: const StadiumBorder(),
-                                            ),
-                                            onPressed: () => _repository.updateQueueStatus(item.id, 'inConsultation'),
-                                            child: const Text('Start Visit', style: TextStyle(fontSize: 12)),
+                                      if (hasVitals) ...[
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: Colors.teal.shade200),
                                           ),
-                                        if (isConsulting)
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppTheme.statusCompleted,
-                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                              shape: const StadiumBorder(),
-                                            ),
-                                            onPressed: () => _showAttendDialog(item),
-                                            child: const Text('Attend Visit', style: TextStyle(fontSize: 12)),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  children: [
-                                    Container(
-                                      width: 64,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        gradient: isConsulting
-                                            ? const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)])
-                                            : AppTheme.primaryGradient,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: (isConsulting ? AppTheme.statusInConsultation : AppTheme.primaryTeal).withValues(alpha: 0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Text(
-                                              'TOKEN',
-                                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white70),
-                                            ),
-                                            Text(
-                                              '#${item.tokenNumber}',
-                                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                                          child: Row(
                                             children: [
-                                              Text(
-                                                item.patientName,
-                                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.secondaryNavy),
+                                              const Icon(Icons.monitor_heart, size: 14, color: AppTheme.primaryTeal),
+                                              const SizedBox(width: 4),
+                                              Expanded(
+                                                child: Text(
+                                                  'Vitals: ${item.vitals!.summaryText}',
+                                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                ),
                                               ),
-                                              const SizedBox(width: 12),
-                                              _buildStatusBadge(isConsulting),
                                             ],
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Phone: ${item.patientPhone}  •  Added: ${dateFormat.format(item.timeAdded)}',
-                                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.info_outline, color: AppTheme.primaryTeal),
+                                            onPressed: () {
+                                              final patient = _repository.getPatientById(item.patientId);
+                                              if (patient != null) {
+                                                PatientDetailDialog.show(context, patient);
+                                              }
+                                            },
                                           ),
-                                          if (item.chiefComplaint.isNotEmpty) ...[
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              'Complaint: ${item.chiefComplaint}',
-                                              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.amber.shade900),
+                                          const SizedBox(width: 8),
+                                          ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
+                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                              shape: const StadiumBorder(),
                                             ),
-                                          ],
+                                            onPressed: () => _openPrescriptionConsultation(item),
+                                            icon: const Icon(Icons.medical_services_outlined, size: 16),
+                                            label: Text(isConsulting ? 'Prescription & Attend' : 'Start Prescription', style: const TextStyle(fontSize: 12)),
+                                          ),
                                         ],
                                       ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          tooltip: 'View Patient History',
-                                          icon: const Icon(Icons.info_outline, color: AppTheme.primaryTeal),
-                                          onPressed: () {
-                                            final patient = _repository.getPatientById(item.patientId);
-                                            if (patient != null) {
-                                              PatientDetailDialog.show(context, patient);
-                                            }
-                                          },
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Container(
+                                        width: 64,
+                                        height: 64,
+                                        decoration: BoxDecoration(
+                                          gradient: isConsulting
+                                              ? const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)])
+                                              : AppTheme.primaryGradient,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: (isConsulting ? AppTheme.statusInConsultation : AppTheme.primaryTeal).withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 8),
-                                        if (!isConsulting)
+                                        child: Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Text(
+                                                'TOKEN',
+                                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white70),
+                                              ),
+                                              Text(
+                                                '#${item.tokenNumber}',
+                                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  item.patientName,
+                                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.secondaryNavy),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                _buildStatusBadge(isConsulting),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Phone: ${item.patientPhone}  •  Added: ${dateFormat.format(item.timeAdded)}',
+                                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                            ),
+                                            if (item.chiefComplaint.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Complaint: ${item.chiefComplaint}',
+                                                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.amber.shade900),
+                                              ),
+                                            ],
+                                            if (hasVitals) ...[
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  const Icon(Icons.monitor_heart, size: 14, color: AppTheme.primaryTeal),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    'Vitals: ${item.vitals!.summaryText}',
+                                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            tooltip: 'View Patient History',
+                                            icon: const Icon(Icons.info_outline, color: AppTheme.primaryTeal),
+                                            onPressed: () {
+                                              final patient = _repository.getPatientById(item.patientId);
+                                              if (patient != null) {
+                                                PatientDetailDialog.show(context, patient);
+                                              }
+                                            },
+                                          ),
+                                          const SizedBox(width: 8),
                                           ElevatedButton.icon(
-                                            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.statusInConsultation),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
+                                            ),
                                             icon: const Icon(Icons.medical_information, size: 16),
-                                            label: const Text('Start Visit'),
-                                            onPressed: () => _repository.updateQueueStatus(item.id, 'inConsultation'),
+                                            label: Text(isConsulting ? 'Attend & Prescribe' : 'Start Prescription'),
+                                            onPressed: () => _openPrescriptionConsultation(item),
                                           ),
-                                        if (isConsulting)
-                                          ElevatedButton.icon(
-                                            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.statusCompleted),
-                                            icon: const Icon(Icons.check_circle, size: 16),
-                                            label: const Text('Attend Visit'),
-                                            onPressed: () => _showAttendDialog(item),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         );
                       },
                     ),

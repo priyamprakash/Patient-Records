@@ -13,12 +13,14 @@ class ClinicRepository extends ChangeNotifier {
   List<QueueItem> _todayQueue = [];
   List<VisitRecord> _visitHistory = [];
   List<Bill> _bills = [];
+  List<MedicineMaster> _medicines = [];
   bool _isInitialized = false;
 
   List<Patient> get patients => List.unmodifiable(_patients);
   List<QueueItem> get todayQueue => List.unmodifiable(_todayQueue);
   List<VisitRecord> get visitHistory => List.unmodifiable(_visitHistory);
   List<Bill> get bills => List.unmodifiable(_bills);
+  List<MedicineMaster> get medicines => List.unmodifiable(_medicines);
   bool get isInitialized => _isInitialized;
 
   // Filtered views
@@ -57,6 +59,7 @@ class ClinicRepository extends ChangeNotifier {
       final queueRaw = prefs.getString('queue_data');
       final visitsRaw = prefs.getString('visits_data');
       final billsRaw = prefs.getString('bills_data');
+      final medicinesRaw = prefs.getString('medicines_data');
 
       if (patientsRaw != null) {
         final List list = jsonDecode(patientsRaw);
@@ -76,6 +79,11 @@ class ClinicRepository extends ChangeNotifier {
       if (billsRaw != null) {
         final List list = jsonDecode(billsRaw);
         _bills = list.map((e) => Bill.fromJson(e)).toList();
+      }
+
+      if (medicinesRaw != null) {
+        final List list = jsonDecode(medicinesRaw);
+        _medicines = list.map((e) => MedicineMaster.fromJson(e)).toList();
       }
 
       // If storage is empty, populate fake database sample data
@@ -102,6 +110,8 @@ class ClinicRepository extends ChangeNotifier {
           'visits_data', jsonEncode(_visitHistory.map((v) => v.toJson()).toList()));
       await prefs.setString(
           'bills_data', jsonEncode(_bills.map((b) => b.toJson()).toList()));
+      await prefs.setString(
+          'medicines_data', jsonEncode(_medicines.map((m) => m.toJson()).toList()));
     } catch (e) {
       debugPrint('Error saving clinic data: $e');
     }
@@ -112,12 +122,33 @@ class ClinicRepository extends ChangeNotifier {
     _todayQueue = FakeClinicDatabase.getSampleTodayQueue(_patients);
     _visitHistory = FakeClinicDatabase.getSampleVisits(_patients);
     _bills = FakeClinicDatabase.getSampleBills(_patients);
+    _medicines = FakeClinicDatabase.getSampleMedicines();
   }
 
   Future<void> resetToFakeDatabase() async {
     _populateSampleData();
     await _saveToStorage();
     notifyListeners();
+  }
+
+  // --- Medicine Master List Actions ---
+  Future<MedicineMaster> addMedicine(MedicineMaster medicine) async {
+    _medicines.add(medicine);
+    await _saveToStorage();
+    notifyListeners();
+    return medicine;
+  }
+
+  Future<void> removeMedicine(String id) async {
+    _medicines.removeWhere((m) => m.id == id);
+    await _saveToStorage();
+    notifyListeners();
+  }
+
+  List<MedicineMaster> searchMedicines(String query) {
+    if (query.trim().isEmpty) return medicines;
+    final q = query.trim().toLowerCase();
+    return _medicines.where((m) => m.name.toLowerCase().contains(q) || m.type.toLowerCase().contains(q)).toList();
   }
 
   // --- Patient Actions ---
@@ -130,6 +161,7 @@ class ClinicRepository extends ChangeNotifier {
     String medicalHistory = '',
     bool addToTodayQueue = true,
     String chiefComplaint = '',
+    Vitals? vitals,
   }) async {
     final patientId = 'PAT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
     final newPatient = Patient(
@@ -157,6 +189,7 @@ class ClinicRepository extends ChangeNotifier {
         timeAdded: DateTime.now(),
         status: 'waiting',
         chiefComplaint: chiefComplaint,
+        vitals: vitals,
       ));
     }
 
@@ -165,7 +198,7 @@ class ClinicRepository extends ChangeNotifier {
     return newPatient;
   }
 
-  Future<void> addToQueue(String patientId, String chiefComplaint) async {
+  Future<void> addToQueue(String patientId, String chiefComplaint, {Vitals? vitals}) async {
     final patient = _patients.firstWhere((p) => p.id == patientId);
     final newToken = getNextTokenNumber();
     final queueId = 'Q-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
@@ -179,6 +212,7 @@ class ClinicRepository extends ChangeNotifier {
       timeAdded: DateTime.now(),
       status: 'waiting',
       chiefComplaint: chiefComplaint,
+      vitals: vitals,
     ));
 
     await _saveToStorage();
@@ -200,12 +234,20 @@ class ClinicRepository extends ChangeNotifier {
     required String prescription,
     required String notes,
     required double fee,
+    Vitals? vitals,
+    List<PrescribedMedicine> medicines = const [],
     bool autoCreateBill = true,
   }) async {
     // 1. Mark Queue Item as Completed
     final qIndex = _todayQueue.indexWhere((q) => q.id == queueItem.id);
     if (qIndex != -1) {
       _todayQueue[qIndex] = _todayQueue[qIndex].copyWith(status: 'completed');
+    }
+
+    // Format prescription string from medicines list if prescription is empty
+    String finalPrescription = prescription;
+    if (finalPrescription.trim().isEmpty && medicines.isNotEmpty) {
+      finalPrescription = medicines.map((m) => m.displayText).join('\n');
     }
 
     // 2. Create Visit Record
@@ -240,10 +282,12 @@ class ClinicRepository extends ChangeNotifier {
       date: DateTime.now(),
       tokenNumber: queueItem.tokenNumber,
       diagnosis: diagnosis,
-      prescription: prescription,
+      prescription: finalPrescription,
       notes: notes,
       fee: fee,
       billId: billId,
+      vitals: vitals ?? queueItem.vitals,
+      medicines: medicines,
     );
 
     _visitHistory.insert(0, visit);
