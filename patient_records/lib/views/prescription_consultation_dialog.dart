@@ -92,15 +92,20 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
     super.dispose();
   }
 
+  TextEditingController? _autocompleteTextController;
+  FocusNode? _autocompleteFocusNode;
+
   void _onSelectMasterMedicine(MedicineMaster med) {
     setState(() {
       _medNameCtrl.text = med.name;
+      _autocompleteTextController?.text = med.name;
       _medType = med.type;
       _dosageCtrl.text = med.defaultDosage;
       if (med.defaultFrequency.isNotEmpty) _frequency = med.defaultFrequency;
       if (med.defaultDuration.isNotEmpty) _duration = med.defaultDuration;
       if (med.defaultInstructions.isNotEmpty) _instructions = med.defaultInstructions;
     });
+    _autocompleteFocusNode?.unfocus();
   }
 
   void _addMedicineToPrescription() {
@@ -122,10 +127,22 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
         instructions: _instructions,
       ));
 
-      // Reset selection form
+      // Reset selection form completely
       _medNameCtrl.clear();
+      _autocompleteTextController?.clear();
       _dosageCtrl.clear();
     });
+
+    _autocompleteFocusNode?.unfocus();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Added "$name" to prescription'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        width: 300,
+      ),
+    );
   }
 
   void _showAddMasterMedicineDialog() {
@@ -496,28 +513,95 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                         children: [
                           // Select Medicine from Master List
                           Autocomplete<MedicineMaster>(
-                            displayStringForOption: (option) => '${option.name} (${option.type})',
+                            displayStringForOption: (option) => option.name,
                             optionsBuilder: (TextEditingValue textEditingValue) {
-                              if (textEditingValue.text.isEmpty) {
-                                return _repository.medicines;
+                              if (textEditingValue.text.trim().isEmpty) {
+                                return const Iterable<MedicineMaster>.empty();
                               }
                               return _repository.searchMedicines(textEditingValue.text);
                             },
                             onSelected: _onSelectMasterMedicine,
+                            optionsViewBuilder: (context, onSelected, options) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Material(
+                                  elevation: 6,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    width: isMobile ? mediaQuery.size.width * 0.85 : 450,
+                                    constraints: const BoxConstraints(maxHeight: 220),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: ListView.separated(
+                                      padding: EdgeInsets.zero,
+                                      shrinkWrap: true,
+                                      itemCount: options.length,
+                                      separatorBuilder: (context, index) => const Divider(height: 1),
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final MedicineMaster option = options.elementAt(index);
+                                        return ListTile(
+                                          dense: true,
+                                          leading: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.primaryTeal.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              option.type,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.primaryTeal,
+                                              ),
+                                            ),
+                                          ),
+                                          title: Text(
+                                            option.name,
+                                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                          ),
+                                          subtitle: option.defaultDosage.isNotEmpty
+                                              ? Text(
+                                                  'Default: ${option.defaultDosage} • ${option.defaultFrequency}',
+                                                  style: const TextStyle(fontSize: 11),
+                                                )
+                                              : null,
+                                          onTap: () => onSelected(option),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                             fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                              if (_medNameCtrl.text.isNotEmpty && controller.text != _medNameCtrl.text) {
-                                controller.text = _medNameCtrl.text;
-                              }
+                              _autocompleteTextController = controller;
+                              _autocompleteFocusNode = focusNode;
                               return TextField(
                                 controller: controller,
                                 focusNode: focusNode,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Select / Search Medicine from List',
                                   hintText: 'Type to search e.g. Paracetamol, Amoxicillin...',
-                                  prefixIcon: Icon(Icons.search),
+                                  prefixIcon: const Icon(Icons.search),
+                                  suffixIcon: controller.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear, size: 18),
+                                          onPressed: () {
+                                            controller.clear();
+                                            _medNameCtrl.clear();
+                                            focusNode.unfocus();
+                                            setState(() {});
+                                          },
+                                        )
+                                      : null,
                                 ),
                                 onChanged: (val) {
                                   _medNameCtrl.text = val;
+                                  setState(() {});
                                 },
                               );
                             },
