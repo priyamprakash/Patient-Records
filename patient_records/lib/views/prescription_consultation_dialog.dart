@@ -36,7 +36,6 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
   late TextEditingController _spo2Ctrl;
 
   // Medicine Assignment Form
-  MedicineMaster? _selectedMasterMedicine;
   final _medNameCtrl = TextEditingController();
   String _medType = 'Tablet';
   final _dosageCtrl = TextEditingController();
@@ -45,6 +44,17 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
   String _instructions = 'After food';
 
   final List<PrescribedMedicine> _assignedMedicines = [];
+
+  final List<String> _quickDiagnoses = [
+    'Acute Viral Fever',
+    'Essential Hypertension',
+    'Upper Respiratory Infection (URTI)',
+    'Type 2 Diabetes Mellitus',
+    'Acute Gastritis / Acid Reflux',
+    'Migraine Headache',
+    'Allergic Rhinitis',
+    'Acute Gastroenteritis',
+  ];
 
   final List<String> _frequencyOptions = ['1-0-1', '1-1-1', '1-0-0', '0-0-1', '1-0-1-0', 'As needed (PRN)'];
   final List<String> _durationOptions = ['3 days', '5 days', '7 days', '10 days', '14 days', '1 month'];
@@ -84,7 +94,6 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
 
   void _onSelectMasterMedicine(MedicineMaster med) {
     setState(() {
-      _selectedMasterMedicine = med;
       _medNameCtrl.text = med.name;
       _medType = med.type;
       _dosageCtrl.text = med.defaultDosage;
@@ -114,7 +123,6 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
       ));
 
       // Reset selection form
-      _selectedMasterMedicine = null;
       _medNameCtrl.clear();
       _dosageCtrl.clear();
     });
@@ -141,7 +149,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: type,
+                initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: _typeOptions.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (val) => type = val!,
@@ -156,7 +164,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: freq,
+                      initialValue: freq,
                       decoration: const InputDecoration(labelText: 'Default Frequency'),
                       items: _frequencyOptions.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
                       onChanged: (val) => freq = val!,
@@ -165,7 +173,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: dur,
+                      initialValue: dur,
                       decoration: const InputDecoration(labelText: 'Default Duration'),
                       items: _durationOptions.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
                       onChanged: (val) => dur = val!,
@@ -405,7 +413,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                             decoration: const InputDecoration(
                               labelText: 'Diagnosis *',
                               hintText: 'e.g. Acute Viral Bronchitis, Type 2 Diabetes',
-                              prefixIcon: Icon(Icons.healing),
+                              prefixIcon: Icon(Icons.healing_rounded),
                             ),
                           ),
                         ),
@@ -423,7 +431,32 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+
+                    // Quick Diagnosis Chips
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: _quickDiagnoses.map((diag) {
+                        return ActionChip(
+                          avatar: const Icon(Icons.add_rounded, size: 14, color: AppTheme.primaryTeal),
+                          label: Text(diag, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                          backgroundColor: AppTheme.primaryTeal.withValues(alpha: 0.08),
+                          side: BorderSide(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                          onPressed: () {
+                            setState(() {
+                              if (_diagnosisController.text.isEmpty) {
+                                _diagnosisController.text = diag;
+                              } else {
+                                _diagnosisController.text = '${_diagnosisController.text}, $diag';
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                     const SizedBox(height: 10),
+
                     TextField(
                       controller: _notesController,
                       decoration: const InputDecoration(
@@ -496,7 +529,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                             children: [
                               Expanded(
                                 child: DropdownButtonFormField<String>(
-                                  value: _medType,
+                                  initialValue: _medType,
                                   decoration: const InputDecoration(labelText: 'Form / Type'),
                                   items: _typeOptions.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                                   onChanged: (val) => setState(() => _medType = val!),
@@ -541,7 +574,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                             children: [
                               Expanded(
                                 child: DropdownButtonFormField<String>(
-                                  value: _duration,
+                                  initialValue: _duration,
                                   decoration: const InputDecoration(labelText: 'Duration'),
                                   items: _durationOptions.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
                                   onChanged: (val) => setState(() => _duration = val!),
@@ -550,7 +583,7 @@ class _PrescriptionConsultationDialogState extends State<PrescriptionConsultatio
                               const SizedBox(width: 12),
                               Expanded(
                                 child: DropdownButtonFormField<String>(
-                                  value: _instructions,
+                                  initialValue: _instructions,
                                   decoration: const InputDecoration(labelText: 'Instructions'),
                                   items: _instructionOptions.map((i) => DropdownMenuItem(value: i, child: Text(i))).toList(),
                                   onChanged: (val) => setState(() => _instructions = val!),

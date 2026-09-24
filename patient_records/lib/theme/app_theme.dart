@@ -2,13 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
+  // Theme state notifier
+  static final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
+
+  static bool get isDark => themeModeNotifier.value == ThemeMode.dark;
+
+  static void toggleTheme() {
+    themeModeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
+  }
+
   // Ultra-Modern Luxury Medical Palette
   static const Color primaryTeal = Color(0xFF0D9488); // Emerald Teal
+  static const Color primaryTealLight = Color(0xFF14B8A6);
   static const Color primaryDark = Color(0xFF0F172A); // Deep Slate Navy
   static const Color secondaryNavy = Color(0xFF0F172A); // Legacy alias
+  static const Color darkBackground = Color(0xFF0B132B); // Midnight Dark
+  static const Color darkCardSurface = Color(0xFF1E293B);
+
   static const Color accentCyan = Color(0xFF06B6D4); // Electric Cyan
   static const Color accentIndigo = Color(0xFF6366F1); // Royal Indigo
   static const Color accentRose = Color(0xFFF43F5E); // Vibrant Rose
+  static const Color accentEmerald = Color(0xFF10B981); // Mint Emerald
+  static const Color accentAmber = Color(0xFFF59E0B); // Gold Amber
+
   static const Color backgroundLight = Color(0xFFF8FAFC); // Crisp Slate White
   static const Color cardSurface = Colors.white;
 
@@ -26,8 +42,8 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient heroCardGradient = LinearGradient(
-    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+  static const LinearGradient darkHeroGradient = LinearGradient(
+    colors: [Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF0F172A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -38,19 +54,34 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
+  static const LinearGradient goldGradient = LinearGradient(
+    colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient emeraldGradient = LinearGradient(
+    colors: [Color(0xFF10B981), Color(0xFF059669)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static const LinearGradient glassBorderGradient = LinearGradient(
     colors: [Color(0x660D9488), Color(0x3306B6D4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
+  // Light Theme Configuration
   static ThemeData get lightTheme {
     final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
 
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryTeal,
+        brightness: Brightness.light,
         primary: primaryTeal,
         secondary: accentCyan,
         surface: backgroundLight,
@@ -109,7 +140,7 @@ class AppTheme {
           backgroundColor: primaryTeal,
           foregroundColor: Colors.white,
           elevation: 2,
-          shadowColor: primaryTeal.withValues(alpha: 0.3),
+          shadowColor: primaryTeal.withValues(alpha: 0.35),
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           textStyle: GoogleFonts.plusJakartaSans(
@@ -139,5 +170,105 @@ class AppTheme {
       ),
     );
   }
+
+  // Dark Luxury Theme Configuration
+  static ThemeData get darkTheme {
+    final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryTeal,
+        brightness: Brightness.dark,
+        primary: primaryTealLight,
+        secondary: accentCyan,
+        surface: darkCardSurface,
+      ),
+      scaffoldBackgroundColor: darkBackground,
+      textTheme: baseTextTheme.copyWith(
+        displayLarge: GoogleFonts.plusJakartaSans(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.5),
+        titleLarge: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.3),
+        titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+        bodyLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+        bodyMedium: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFFCBD5E1)),
+        labelLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.3),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: darkCardSurface,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: darkCardSurface,
+        elevation: 0,
+        shadowColor: Colors.black45,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFF334155), width: 1),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF0F172A),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        hintStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF64748B), fontSize: 13),
+        labelStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF94A3B8), fontSize: 13, fontWeight: FontWeight.w600),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF334155)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF334155)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: primaryTealLight, width: 2),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryTeal,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          shadowColor: primaryTeal.withValues(alpha: 0.5),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primaryTealLight,
+          side: const BorderSide(color: primaryTealLight, width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFF1E293B),
+        side: const BorderSide(color: Color(0xFF334155)),
+        labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+      ),
+    );
+  }
 }
+
 

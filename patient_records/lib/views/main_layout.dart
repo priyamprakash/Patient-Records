@@ -55,6 +55,7 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
           );
         }
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         final waitingCount = _repository.waitingQueue.length;
         final attendedTodayCount = _repository.attendedTodayQueue.length;
         final revenueToday = _repository.todayRevenue;
@@ -82,16 +83,16 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.95),
-                    border: const Border(
+                    color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.95) : Colors.white.withValues(alpha: 0.95),
+                    border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                         width: 1,
                       ),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                        color: isDark ? Colors.black26 : const Color(0xFF0F172A).withValues(alpha: 0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -123,11 +124,11 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                           children: [
                             Text(
                               isMobile ? 'MEDICARE' : 'MEDICARE CLINIC EMR',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.6,
-                                color: AppTheme.primaryDark,
+                                color: isDark ? Colors.white : AppTheme.primaryDark,
                               ),
                             ),
                             Text(
@@ -135,12 +136,39 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade500,
+                                color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade500,
                               ),
                             ),
                           ],
                         ),
                         const Spacer(),
+
+                        // Theme Mode Toggle Button
+                        ValueListenableBuilder<ThemeMode>(
+                          valueListenable: AppTheme.themeModeNotifier,
+                          builder: (context, mode, _) {
+                            final isDarkActive = mode == ThemeMode.dark;
+                            return Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                color: isDarkActive ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: isDarkActive ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                              ),
+                              child: IconButton(
+                                tooltip: isDarkActive ? 'Switch to Light Luxury Theme' : 'Switch to Midnight Dark Theme',
+                                icon: Icon(
+                                  isDarkActive ? Icons.wb_sunny_rounded : Icons.nightlight_round,
+                                  color: isDarkActive ? Colors.amber : AppTheme.primaryDark,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  AppTheme.toggleTheme();
+                                },
+                              ),
+                            );
+                          },
+                        ),
 
                         // Live Date & System Pill (Desktop)
                         if (!isMobile) ...[
@@ -148,9 +176,9 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                             margin: const EdgeInsets.only(right: 12),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                             ),
                             child: Row(
                               children: [
@@ -165,10 +193,10 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                                 const SizedBox(width: 8),
                                 Text(
                                   DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now()),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: AppTheme.primaryDark,
+                                    color: isDark ? Colors.white : AppTheme.primaryDark,
                                   ),
                                 ),
                               ],
@@ -179,8 +207,8 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                         // Reset Sample DB Button
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.primaryDark,
-                            side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
+                            foregroundColor: isDark ? Colors.white : AppTheme.primaryDark,
+                            side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1), width: 1.2),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),

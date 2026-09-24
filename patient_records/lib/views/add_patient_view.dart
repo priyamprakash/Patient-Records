@@ -196,7 +196,7 @@ class _AddPatientViewState extends State<AddPatientView> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _gender,
+                            initialValue: _gender,
                             decoration: const InputDecoration(
                               labelText: 'Gender *',
                               prefixIcon: Icon(Icons.wc_outlined),
@@ -267,7 +267,7 @@ class _AddPatientViewState extends State<AddPatientView> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _gender,
+                            initialValue: _gender,
                             decoration: const InputDecoration(
                               labelText: 'Gender *',
                               prefixIcon: Icon(Icons.wc_outlined),
@@ -296,7 +296,7 @@ class _AddPatientViewState extends State<AddPatientView> {
                     child: Column(
                       children: [
                         SwitchListTile(
-                          activeColor: AppTheme.primaryTeal,
+                          activeThumbColor: AppTheme.primaryTeal,
                           secondary: Icon(
                             Icons.monitor_heart_outlined,
                             color: _showVitalsSection ? AppTheme.primaryTeal : Colors.grey.shade600,
