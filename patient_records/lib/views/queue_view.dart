@@ -379,34 +379,51 @@ class _QueueViewState extends State<QueueView> {
 
   Widget _buildGlassStatCard(String title, String value, IconData icon, Color color, bool isMobile) {
     return Expanded(
-      child: GlassCard(
-        padding: EdgeInsets.all(isMobile ? 10 : 16),
-        borderColor: color.withValues(alpha: 0.3),
+      child: Container(
+        padding: EdgeInsets.all(isMobile ? 12 : 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.25), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(isMobile ? 8 : 12),
+              padding: EdgeInsets.all(isMobile ? 10 : 14),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: color, size: isMobile ? 20 : 26),
+              child: Icon(icon, color: color, size: isMobile ? 22 : 28),
             ),
-            SizedBox(width: isMobile ? 8 : 14),
+            SizedBox(width: isMobile ? 10 : 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: isMobile ? 10 : 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: isMobile ? 11 : 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     value,
                     style: TextStyle(
-                      fontSize: isMobile ? 16 : 24,
-                      fontWeight: FontWeight.w800,
+                      fontSize: isMobile ? 18 : 26,
+                      fontWeight: FontWeight.w900,
                       color: color,
                     ),
                   ),

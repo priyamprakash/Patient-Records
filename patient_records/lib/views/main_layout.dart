@@ -73,27 +73,27 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
         ];
 
         return Scaffold(
-          // Clean, Full-Width Edge-to-Edge Glass Top AppBar
+          // Clean, Full-Width Ultra-Modern App Bar
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
+            preferredSize: const Size.fromHeight(64),
             child: ClipRect(
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.95),
-                    border: Border(
+                    border: const Border(
                       bottom: BorderSide(
-                        color: AppTheme.secondaryNavy.withValues(alpha: 0.12),
-                        width: 1.5,
+                        color: Color(0xFFE2E8F0),
+                        width: 1,
                       ),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -102,77 +102,99 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                       children: [
                         // Clinic Logo Badge
                         Container(
-                          padding: const EdgeInsets.all(7),
+                          padding: const EdgeInsets.all(9),
                           decoration: BoxDecoration(
                             gradient: AppTheme.primaryGradient,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.primaryTeal.withValues(alpha: 0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
+                                color: AppTheme.primaryTeal.withValues(alpha: 0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.local_hospital, color: Colors.white, size: 18),
+                          child: const Icon(Icons.local_hospital_rounded, color: Colors.white, size: 20),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          isMobile ? 'MEDICARE' : 'MEDICARE CLINIC CARE',
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
-                            color: AppTheme.secondaryNavy,
-                          ),
+                        const SizedBox(width: 14),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isMobile ? 'MEDICARE' : 'MEDICARE CLINIC EMR',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.6,
+                                color: AppTheme.primaryDark,
+                              ),
+                            ),
+                            Text(
+                              'Smart Clinical Practice System',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
                         ),
                         const Spacer(),
 
-                        // Live Date Capsule (Desktop)
-                        if (!isMobile)
+                        // Live Date & System Pill (Desktop)
+                        if (!isMobile) ...[
                           Container(
                             margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryTeal.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.2)),
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.calendar_today, size: 14, color: AppTheme.primaryTeal),
-                                const SizedBox(width: 6),
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.statusCompleted,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                                 Text(
-                                  DateFormat('MMM dd, yyyy').format(DateTime.now()),
+                                  DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now()),
                                   style: const TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryTeal,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.primaryDark,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                        ],
 
                         // Reset Sample DB Button
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.primaryTeal,
-                            side: BorderSide(color: AppTheme.primaryTeal.withValues(alpha: 0.5)),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                            shape: const StadiumBorder(),
+                            foregroundColor: AppTheme.primaryDark,
+                            side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          icon: const Icon(Icons.dataset, size: 16),
+                          icon: const Icon(Icons.refresh_rounded, size: 16, color: AppTheme.primaryTeal),
                           label: Text(
                             isMobile ? 'Reset DB' : 'Reset Sample DB',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                           ),
                           onPressed: () async {
                             await _repository.resetToFakeDatabase();
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Fake database re-seeded with sample data!'),
+                                  content: Text('Database reset with sample patients, queue, and medicines!'),
                                   backgroundColor: AppTheme.primaryTeal,
                                 ),
                               );
@@ -187,24 +209,24 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
             ),
           ),
 
-          // Body: Desktop gets Sidebar + Screen; Mobile gets Screen + Clean Floating Bottom Dock
+          // Body: Desktop gets Sidebar + Screen; Mobile gets Screen + Floating Bottom Dock
           body: isMobile
               ? Column(
                   children: [
-                    // Mobile Glass Quick Header Stats Bar
+                    // Mobile Header Stats Bar
                     Container(
-                      margin: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        backgroundColor: Colors.white.withValues(alpha: 0.95),
-                        borderRadius: 14,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        backgroundColor: Colors.white,
+                        borderRadius: 16,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildMobileStatBadge('Waiting', '$waitingCount', AppTheme.statusWaiting),
-                            Container(width: 1, height: 16, color: Colors.grey.shade300),
+                            Container(width: 1, height: 18, color: const Color(0xFFE2E8F0)),
                             _buildMobileStatBadge('Attended', '$attendedTodayCount', AppTheme.statusCompleted),
-                            Container(width: 1, height: 16, color: Colors.grey.shade300),
+                            Container(width: 1, height: 18, color: const Color(0xFFE2E8F0)),
                             _buildMobileStatBadge('Revenue', '₹${revenueToday.toStringAsFixed(0)}', AppTheme.accentCyan),
                           ],
                         ),
@@ -220,56 +242,111 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                 )
               : Row(
                   children: [
-                    // Desktop Sidebar Navigation
-                    NavigationRail(
-                      selectedIndex: _selectedIndex,
-                      onDestinationSelected: (int index) {
-                        setState(() => _selectedIndex = index);
-                      },
-                      extended: true,
-                      minExtendedWidth: 210,
-                      backgroundColor: AppTheme.secondaryNavy,
-                      unselectedIconTheme: const IconThemeData(color: Colors.white60),
-                      selectedIconTheme: const IconThemeData(color: Colors.tealAccent, size: 24),
-                      unselectedLabelTextStyle: const TextStyle(color: Colors.white60, fontSize: 13),
-                      selectedLabelTextStyle: const TextStyle(
-                        color: Colors.tealAccent,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    // Ultra-Modern Desktop Navigation Rail
+                    Container(
+                      width: 230,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.primaryDark,
                       ),
-                      destinations: [
-                        NavigationRailDestination(
-                          icon: Badge(
-                            label: Text('$waitingCount'),
-                            isLabelVisible: waitingCount > 0,
-                            child: const Icon(Icons.hourglass_top),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          // Section Header Label
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'CLINIC DASHBOARD',
+                                style: TextStyle(
+                                  color: Colors.grey.shade400,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
                           ),
-                          selectedIcon: const Icon(Icons.hourglass_bottom),
-                          label: const Text('Waiting Queue'),
-                        ),
-                        NavigationRailDestination(
-                          icon: const Icon(Icons.check_circle_outline),
-                          selectedIcon: const Icon(Icons.check_circle),
-                          label: const Text('Attended Today'),
-                        ),
-                        const NavigationRailDestination(
-                          icon: Icon(Icons.person_add_outlined),
-                          selectedIcon: Icon(Icons.person_add),
-                          label: Text('Add Patient'),
-                        ),
-                        const NavigationRailDestination(
-                          icon: Icon(Icons.calendar_month_outlined),
-                          selectedIcon: Icon(Icons.calendar_month),
-                          label: Text('All Patients'),
-                        ),
-                        const NavigationRailDestination(
-                          icon: Icon(Icons.receipt_long_outlined),
-                          selectedIcon: Icon(Icons.receipt_long),
-                          label: Text('Bill Generator'),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+
+                          // Navigation Items
+                          _buildDesktopNavItem(
+                            index: 0,
+                            icon: Icons.hourglass_top_rounded,
+                            activeIcon: Icons.hourglass_bottom_rounded,
+                            label: 'Waiting Queue',
+                            badgeCount: waitingCount,
+                            badgeColor: AppTheme.statusWaiting,
+                          ),
+                          _buildDesktopNavItem(
+                            index: 1,
+                            icon: Icons.check_circle_outline_rounded,
+                            activeIcon: Icons.check_circle_rounded,
+                            label: 'Attended Today',
+                            badgeCount: attendedTodayCount,
+                            badgeColor: AppTheme.statusCompleted,
+                          ),
+                          _buildDesktopNavItem(
+                            index: 2,
+                            icon: Icons.person_add_alt_outlined,
+                            activeIcon: Icons.person_add_alt_1_rounded,
+                            label: 'Register Patient',
+                          ),
+                          _buildDesktopNavItem(
+                            index: 3,
+                            icon: Icons.folder_shared_outlined,
+                            activeIcon: Icons.folder_shared_rounded,
+                            label: 'Patient Directory',
+                          ),
+                          _buildDesktopNavItem(
+                            index: 4,
+                            icon: Icons.receipt_long_outlined,
+                            activeIcon: Icons.receipt_long_rounded,
+                            label: 'Bill Generator',
+                          ),
+
+                          const Spacer(),
+
+                          // Quick Doctor Profile Card at Bottom
+                          Container(
+                            margin: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            ),
+                            child: Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: AppTheme.primaryTeal,
+                                  child: Icon(Icons.person, color: Colors.white, size: 20),
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Dr. Sharma',
+                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                      ),
+                                      Text(
+                                        'General Physician',
+                                        style: TextStyle(color: Colors.white60, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const VerticalDivider(thickness: 1, width: 1),
+                    const VerticalDivider(thickness: 1, width: 1, color: Color(0xFFE2E8F0)),
                     Expanded(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 250),
@@ -279,7 +356,6 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                   ],
                 ),
 
-          // Clean Floating Dock without any extra background container box
           bottomNavigationBar: isMobile
               ? _buildCleanFloatingDock(waitingCount)
               : null,
@@ -288,18 +364,91 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
     );
   }
 
+  Widget _buildDesktopNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    int badgeCount = 0,
+    Color? badgeColor,
+  }) {
+    final isSelected = _selectedIndex == index;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      child: InkWell(
+        onTap: () => setState(() => _selectedIndex = index),
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            gradient: isSelected ? AppTheme.primaryGradient : null,
+            color: isSelected ? null : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primaryTeal.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? Colors.white : Colors.white70,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.white70,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              if (badgeCount > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white : (badgeColor ?? AppTheme.statusWaiting),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$badgeCount',
+                    style: TextStyle(
+                      color: isSelected ? AppTheme.primaryDark : Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCleanFloatingDock(int waitingCount) {
     final items = [
-      {'icon': Icons.hourglass_top, 'activeIcon': Icons.hourglass_bottom, 'label': 'Queue', 'badge': waitingCount},
-      {'icon': Icons.check_circle_outline, 'activeIcon': Icons.check_circle, 'label': 'Attended', 'badge': 0},
-      {'icon': Icons.person_add_outlined, 'activeIcon': Icons.person_add, 'label': 'Add', 'badge': 0},
-      {'icon': Icons.calendar_month_outlined, 'activeIcon': Icons.calendar_month, 'label': 'Directory', 'badge': 0},
-      {'icon': Icons.receipt_long_outlined, 'activeIcon': Icons.receipt_long, 'label': 'Billing', 'badge': 0},
+      {'icon': Icons.hourglass_top_rounded, 'activeIcon': Icons.hourglass_bottom_rounded, 'label': 'Queue', 'badge': waitingCount},
+      {'icon': Icons.check_circle_outline_rounded, 'activeIcon': Icons.check_circle_rounded, 'label': 'Attended', 'badge': 0},
+      {'icon': Icons.person_add_outlined, 'activeIcon': Icons.person_add_rounded, 'label': 'Add', 'badge': 0},
+      {'icon': Icons.folder_shared_outlined, 'activeIcon': Icons.folder_shared_rounded, 'label': 'Directory', 'badge': 0},
+      {'icon': Icons.receipt_long_outlined, 'activeIcon': Icons.receipt_long_rounded, 'label': 'Billing', 'badge': 0},
     ];
 
     return SafeArea(
       child: Container(
-        color: Colors.transparent, // Zero extra background box behind the dock
+        color: Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -320,12 +469,10 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                 ),
                 decoration: BoxDecoration(
                   gradient: isSelected ? AppTheme.primaryGradient : null,
-                  color: isSelected ? null : Colors.white.withValues(alpha: 0.9),
+                  color: isSelected ? null : Colors.white,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: isSelected
-                        ? AppTheme.primaryTeal
-                        : AppTheme.secondaryNavy.withValues(alpha: 0.2),
+                    color: isSelected ? AppTheme.primaryTeal : const Color(0xFFE2E8F0),
                     width: 1.2,
                   ),
                   boxShadow: [
@@ -348,7 +495,7 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
                       textColor: Colors.white,
                       child: Icon(
                         isSelected ? (item['activeIcon'] as IconData) : (item['icon'] as IconData),
-                        color: isSelected ? Colors.white : AppTheme.secondaryNavy,
+                        color: isSelected ? Colors.white : AppTheme.primaryDark,
                         size: isSelected ? 20 : 18,
                       ),
                     ),

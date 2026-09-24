@@ -2,29 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Vibrant Medical Palette
-  static const Color primaryTeal = Color(0xFF0F766E);
-  static const Color accentCyan = Color(0xFF06B6D4);
-  static const Color secondaryNavy = Color(0xFF0F172A);
-  static const Color backgroundLight = Color(0xFFF1F5F9);
-  static const Color glassSurface = Color(0xF2FFFFFF);
+  // Ultra-Modern Luxury Medical Palette
+  static const Color primaryTeal = Color(0xFF0D9488); // Emerald Teal
+  static const Color primaryDark = Color(0xFF0F172A); // Deep Slate Navy
+  static const Color secondaryNavy = Color(0xFF0F172A); // Legacy alias
+  static const Color accentCyan = Color(0xFF06B6D4); // Electric Cyan
+  static const Color accentIndigo = Color(0xFF6366F1); // Royal Indigo
+  static const Color accentRose = Color(0xFFF43F5E); // Vibrant Rose
+  static const Color backgroundLight = Color(0xFFF8FAFC); // Crisp Slate White
+  static const Color cardSurface = Colors.white;
 
   // Status Colors
-  static const Color statusWaiting = Color(0xFFD97706);
-  static const Color statusInConsultation = Color(0xFF2563EB);
-  static const Color statusCompleted = Color(0xFF059669);
+  static const Color statusWaiting = Color(0xFFF59E0B); // Amber Gold
+  static const Color statusInConsultation = Color(0xFF3B82F6); // Electric Blue
+  static const Color statusCompleted = Color(0xFF10B981); // Emerald Green
   static const Color statusPaid = Color(0xFF10B981);
-  static const Color statusPending = Color(0xFFE11D48);
+  static const Color statusPending = Color(0xFFEF4444);
 
-  // Gradients
+  // Rich Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF0284C7)],
+    colors: [Color(0xFF0D9488), Color(0xFF0284C7), Color(0xFF4F46E5)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient heroCardGradient = LinearGradient(
+    colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient accentGradient = LinearGradient(
+    colors: [Color(0xFF06B6D4), Color(0xFF3B82F6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient glassBorderGradient = LinearGradient(
-    colors: [Color(0x80FFFFFF), Color(0x330D9488)],
+    colors: [Color(0x660D9488), Color(0x3306B6D4)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -42,50 +57,50 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: backgroundLight,
       textTheme: baseTextTheme.copyWith(
-        displayLarge: GoogleFonts.plusJakartaSans(fontSize: 28, fontWeight: FontWeight.bold, color: secondaryNavy),
-        titleLarge: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w700, color: secondaryNavy),
-        titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w600, color: secondaryNavy),
-        bodyLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w500, color: secondaryNavy),
-        bodyMedium: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.black87),
-        labelLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600),
+        displayLarge: GoogleFonts.plusJakartaSans(fontSize: 28, fontWeight: FontWeight.w800, color: primaryDark, letterSpacing: -0.5),
+        titleLarge: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w800, color: primaryDark, letterSpacing: -0.3),
+        titleMedium: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: primaryDark),
+        bodyLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: primaryDark),
+        bodyMedium: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF334155)),
+        labelLarge: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.3),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: primaryTeal,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: primaryDark,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: GoogleFonts.plusJakartaSans(
-          color: Colors.white,
+          color: primaryDark,
           fontSize: 18,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.3,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.2,
         ),
       ),
       cardTheme: CardThemeData(
-        color: glassSurface,
-        elevation: 3,
-        shadowColor: const Color(0x1A0F172A),
+        color: cardSurface,
+        elevation: 0,
+        shadowColor: const Color(0x0F0F172A),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0x1F0F766E), width: 1),
+          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.9),
+        fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        hintStyle: GoogleFonts.plusJakartaSans(color: Colors.grey.shade400, fontSize: 13),
-        labelStyle: GoogleFonts.plusJakartaSans(color: Colors.grey.shade700, fontSize: 13),
+        hintStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF94A3B8), fontSize: 13),
+        labelStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w600),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Colors.teal.shade100),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: Colors.teal.shade100),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: primaryTeal, width: 2),
         ),
       ),
@@ -94,8 +109,9 @@ class AppTheme {
           backgroundColor: primaryTeal,
           foregroundColor: Colors.white,
           elevation: 2,
+          shadowColor: primaryTeal.withValues(alpha: 0.3),
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -108,18 +124,20 @@ class AppTheme {
           foregroundColor: primaryTeal,
           side: const BorderSide(color: primaryTeal, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
       chipTheme: ChipThemeData(
-        shape: const StadiumBorder(),
-        backgroundColor: Colors.teal.shade50,
-        side: BorderSide(color: Colors.teal.shade100),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: const Color(0xFFF1F5F9),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        labelStyle: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600),
       ),
     );
   }
 }
+
