@@ -16,19 +16,13 @@ class ClinicApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: AppTheme.themeModeNotifier,
-      builder: (context, mode, _) {
-        return MaterialApp(
-          title: 'Medicare Clinic Management System',
-          debugShowCheckedModeBanner: false,
-          themeMode: mode,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          home: const MainLayout(),
-        );
-      },
+    return MaterialApp(
+      title: 'Medicare Clinic Management System',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      home: const MainLayout(),
     );
   }
 }
+
 

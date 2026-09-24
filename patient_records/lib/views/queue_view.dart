@@ -35,7 +35,6 @@ class _QueueViewState extends State<QueueView> {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('hh:mm a');
     final isMobile = MediaQuery.of(context).size.width < 700;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnimatedBuilder(
       animation: _repository,
@@ -76,54 +75,52 @@ class _QueueViewState extends State<QueueView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Today's Live Waiting Queue",
+                          "Today's Live Queue",
                           style: TextStyle(
-                            fontSize: isMobile ? 18 : 24,
-                            fontWeight: FontWeight.w900,
+                            fontSize: isMobile ? 20 : 24,
+                            fontWeight: FontWeight.w800,
                             letterSpacing: -0.3,
-                            color: isDark ? Colors.white : AppTheme.secondaryNavy,
+                            color: AppTheme.secondaryNavy,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now()),
-                          style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600, fontSize: isMobile ? 12 : 13),
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: isMobile ? 12 : 13),
                         ),
                       ],
                     ),
                   ),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      elevation: 4,
-                      shadowColor: AppTheme.primaryTeal.withValues(alpha: 0.4),
                       padding: EdgeInsets.symmetric(
                         horizontal: isMobile ? 14 : 20,
-                        vertical: isMobile ? 12 : 16,
+                        vertical: isMobile ? 12 : 14,
                       ),
                     ),
                     onPressed: widget.onNavigateToAddPatient,
                     icon: const Icon(Icons.person_add_rounded, size: 18),
-                    label: Text(isMobile ? '+ Register' : 'Register & Add Patient', style: const TextStyle(fontWeight: FontWeight.w800)),
+                    label: Text(isMobile ? '+ Register' : 'Register & Add Patient', style: const TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
               const SizedBox(height: 18),
 
-              // Summary Glass Stat Cards
+              // Summary Stat Cards (Light Executive)
               Row(
                 children: [
-                  _buildGlassStatCard('Waiting', '$waitingCount', Icons.hourglass_top_rounded, AppTheme.statusWaiting, AppTheme.goldGradient, isMobile, isDark),
+                  _buildStatCard('Waiting Queue', '$waitingCount', Icons.hourglass_top_rounded, AppTheme.statusWaiting, isMobile),
                   SizedBox(width: isMobile ? 8 : 16),
-                  _buildGlassStatCard('In Consult', '$inConsultationCount', Icons.medical_services_rounded, AppTheme.statusInConsultation, AppTheme.accentGradient, isMobile, isDark),
+                  _buildStatCard('In Consultation', '$inConsultationCount', Icons.medical_services_rounded, AppTheme.statusInConsultation, isMobile),
                   SizedBox(width: isMobile ? 8 : 16),
-                  _buildGlassStatCard('Attended', '${_repository.attendedTodayQueue.length}', Icons.check_circle_rounded, AppTheme.statusCompleted, AppTheme.emeraldGradient, isMobile, isDark),
+                  _buildStatCard('Attended Today', '${_repository.attendedTodayQueue.length}', Icons.check_circle_rounded, AppTheme.statusCompleted, isMobile),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               // Search & Filter Bar
               GlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 child: Row(
                   children: [
                     Expanded(
@@ -131,8 +128,8 @@ class _QueueViewState extends State<QueueView> {
                         controller: _searchController,
                         onChanged: (_) => setState(() {}),
                         decoration: InputDecoration(
-                          hintText: 'Search queue by name, phone, or token #...',
-                          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryTeal),
+                          hintText: 'Search by patient name, phone, or token #...',
+                          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryTeal, size: 20),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
                                   icon: const Icon(Icons.clear_rounded, size: 18),
@@ -145,7 +142,7 @@ class _QueueViewState extends State<QueueView> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Quick Filter Chips
+                    // Filter Chips
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
@@ -173,20 +170,20 @@ class _QueueViewState extends State<QueueView> {
                           children: [
                             Icon(
                               _searchController.text.isNotEmpty ? Icons.search_off_rounded : Icons.check_circle_outline_rounded,
-                              size: isMobile ? 40 : 60,
-                              color: AppTheme.primaryTeal.withValues(alpha: 0.7),
+                              size: isMobile ? 36 : 48,
+                              color: AppTheme.primaryTeal.withValues(alpha: 0.6),
                             ),
                             const SizedBox(height: 12),
                             Text(
                               _searchController.text.isNotEmpty
                                   ? 'No patients match your search criteria.'
-                                  : 'No patients currently waiting in queue!',
-                              style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.w700),
+                                  : 'No patients currently waiting in queue.',
+                              style: TextStyle(fontSize: isMobile ? 14 : 16, fontWeight: FontWeight.w700),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Tap "+ Register" to issue an instant token.',
-                              style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13),
+                              'Click "+ Register" to issue a new queue token.',
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                             ),
                           ],
                         ),
@@ -202,216 +199,207 @@ class _QueueViewState extends State<QueueView> {
                         final isConsulting = item.status == 'inConsultation';
                         final vitals = item.vitals;
                         final hasAlert = vitals != null && _hasVitalAlert(vitals);
+                        final accentColor = hasAlert
+                            ? AppTheme.accentRose
+                            : (isConsulting ? AppTheme.statusInConsultation : AppTheme.statusWaiting);
 
-                        return InkWell(
-                          onTap: () => _openPrescriptionConsultation(item),
-                          borderRadius: BorderRadius.circular(20),
-                          child: GlassCard(
-                            borderColor: hasAlert
-                                ? AppTheme.accentRose
-                                : (isConsulting ? AppTheme.statusInConsultation : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))),
-                            backgroundColor: isConsulting
-                                ? (isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.4) : Colors.blue.shade50.withValues(alpha: 0.9))
-                                : null,
-                            padding: EdgeInsets.all(isMobile ? 14 : 18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    // Token Circle
-                                    Container(
-                                      width: isMobile ? 52 : 62,
-                                      height: isMobile ? 52 : 62,
-                                      decoration: BoxDecoration(
-                                        gradient: isConsulting
-                                            ? const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF3B82F6)])
-                                            : (hasAlert ? AppTheme.goldGradient : AppTheme.primaryGradient),
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: (isConsulting
-                                                    ? AppTheme.statusInConsultation
-                                                    : (hasAlert ? AppTheme.accentRose : AppTheme.primaryTeal))
-                                                .withValues(alpha: 0.35),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Text(
-                                              'TOKEN',
-                                              style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white70, letterSpacing: 0.5),
-                                            ),
-                                            Text(
-                                              '#${item.tokenNumber}',
-                                              style: TextStyle(fontSize: isMobile ? 18 : 22, fontWeight: FontWeight.w900, color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 14),
-
-                                    // Patient Main Information
-                                    Expanded(
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: hasAlert
+                                  ? AppTheme.accentRose.withValues(alpha: 0.4)
+                                  : (isConsulting ? AppTheme.statusInConsultation.withValues(alpha: 0.4) : const Color(0xFFE2E8F0)),
+                              width: 1,
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x080F172A),
+                                blurRadius: 10,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Left Status Accent Strip
+                                  Container(
+                                    width: 5,
+                                    color: accentColor,
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(isMobile ? 12 : 16),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
+                                          // Top Row: Token Pill + Status Pill + Wait Time
                                           Row(
                                             children: [
-                                              Flexible(
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFF1F5F9),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                                ),
                                                 child: Text(
-                                                  item.patientName,
-                                                  style: TextStyle(
-                                                    fontSize: isMobile ? 16 : 19,
+                                                  'TOKEN #${item.tokenNumber}',
+                                                  style: const TextStyle(
+                                                    color: AppTheme.primaryDark,
                                                     fontWeight: FontWeight.w800,
-                                                    color: isDark ? Colors.white : AppTheme.secondaryNavy,
+                                                    fontSize: 12,
+                                                    letterSpacing: 0.4,
                                                   ),
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
                                               _buildStatusBadge(isConsulting, hasAlert),
+                                              const Spacer(),
+                                              Text(
+                                                '🕒 ${dateFormat.format(item.timeAdded)}',
+                                                style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500),
+                                              ),
                                             ],
                                           ),
-                                          const SizedBox(height: 3),
-                                          Text(
-                                            '📞 ${item.patientPhone}   •   ⌛ Added: ${dateFormat.format(item.timeAdded)}',
-                                            style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.w500),
+                                          const SizedBox(height: 10),
+
+                                          // Patient Name & Subtitle Info
+                                          Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      item.patientName,
+                                                      style: TextStyle(
+                                                        fontSize: isMobile ? 16 : 18,
+                                                        fontWeight: FontWeight.w800,
+                                                        color: AppTheme.primaryDark,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      '📱 ${item.patientPhone}',
+                                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+
+                                              // Desktop Action Buttons
+                                              if (!isMobile) ...[
+                                                OutlinedButton.icon(
+                                                  style: OutlinedButton.styleFrom(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                                  ),
+                                                  icon: const Icon(Icons.info_outline_rounded, size: 16),
+                                                  label: const Text('Profile'),
+                                                  onPressed: () {
+                                                    final patient = _repository.getPatientById(item.patientId);
+                                                    if (patient != null) {
+                                                      PatientDetailDialog.show(context, patient);
+                                                    }
+                                                  },
+                                                ),
+                                                const SizedBox(width: 8),
+                                                ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                                  ),
+                                                  icon: const Icon(Icons.medical_services_rounded, size: 16),
+                                                  label: Text(isConsulting ? 'Prescribe & Attend' : 'Start Consultation'),
+                                                  onPressed: () => _openPrescriptionConsultation(item),
+                                                ),
+                                              ],
+                                            ],
                                           ),
+
+                                          // Chief Complaint Banner
+                                          if (item.chiefComplaint.isNotEmpty) ...[
+                                            const SizedBox(height: 8),
+                                            Container(
+                                              width: double.infinity,
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.amber.shade50.withValues(alpha: 0.6),
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(color: Colors.amber.shade200),
+                                              ),
+                                              child: Text(
+                                                'Complaint: ${item.chiefComplaint}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.amber.shade900,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+
+                                          // Vitals Badges Row
+                                          if (vitals != null && !vitals.isEmpty) ...[
+                                            const SizedBox(height: 10),
+                                            Wrap(
+                                              spacing: 8,
+                                              runSpacing: 6,
+                                              children: [
+                                                if (vitals.bp.isNotEmpty)
+                                                  _buildVitalBadge('BP', vitals.bp, _getBPColor(vitals.bp)),
+                                                if (vitals.pulse.isNotEmpty)
+                                                  _buildVitalBadge('Pulse', '${vitals.pulse} bpm', _getPulseColor(vitals.pulse)),
+                                                if (vitals.temperature.isNotEmpty)
+                                                  _buildVitalBadge('Temp', '${vitals.temperature}°F', _getTempColor(vitals.temperature)),
+                                                if (vitals.spo2.isNotEmpty)
+                                                  _buildVitalBadge('SpO2', '${vitals.spo2}%', _getSpO2Color(vitals.spo2)),
+                                                if (vitals.weight.isNotEmpty)
+                                                  _buildVitalBadge('Weight', '${vitals.weight} kg', AppTheme.primaryDark),
+                                              ],
+                                            ),
+                                          ],
+
+                                          // Mobile Actions
+                                          if (isMobile) ...[
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                OutlinedButton(
+                                                  onPressed: () {
+                                                    final patient = _repository.getPatientById(item.patientId);
+                                                    if (patient != null) {
+                                                      PatientDetailDialog.show(context, patient);
+                                                    }
+                                                  },
+                                                  child: const Text('Profile', style: TextStyle(fontSize: 12)),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                ElevatedButton.icon(
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                                  ),
+                                                  onPressed: () => _openPrescriptionConsultation(item),
+                                                  icon: const Icon(Icons.medical_services_rounded, size: 16),
+                                                  label: Text(isConsulting ? 'Attend' : 'Start Consult', style: const TextStyle(fontSize: 12)),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
-
-                                    // Action Buttons (Desktop)
-                                    if (!isMobile) ...[
-                                      IconButton(
-                                        tooltip: 'View Patient Record & History',
-                                        icon: const Icon(Icons.info_outline_rounded, color: AppTheme.primaryTeal),
-                                        onPressed: () {
-                                          final patient = _repository.getPatientById(item.patientId);
-                                          if (patient != null) {
-                                            PatientDetailDialog.show(context, patient);
-                                          }
-                                        },
-                                      ),
-                                      const SizedBox(width: 8),
-                                      ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
-                                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                                          shape: const StadiumBorder(),
-                                        ),
-                                        icon: const Icon(Icons.medical_services_rounded, size: 16),
-                                        label: Text(isConsulting ? 'Attend & Prescribe' : 'Start Consultation'),
-                                        onPressed: () => _openPrescriptionConsultation(item),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-
-                                // Chief Complaint Banner
-                                if (item.chiefComplaint.isNotEmpty) ...[
-                                  const SizedBox(height: 10),
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF78350F).withValues(alpha: 0.3) : Colors.amber.shade50,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: isDark ? const Color(0xFFB45309) : Colors.amber.shade200),
-                                    ),
-                                    child: Text(
-                                      '📋 Chief Complaint: ${item.chiefComplaint}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
-                                      ),
-                                    ),
                                   ),
                                 ],
-
-                                // Detailed Color-Coded Vitals Pills Row
-                                if (vitals != null && !vitals.isEmpty) ...[
-                                  const SizedBox(height: 10),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 6,
-                                    children: [
-                                      if (vitals.bp.isNotEmpty)
-                                        _buildVitalBadge(
-                                          'BP',
-                                          vitals.bp,
-                                          _getBPColor(vitals.bp),
-                                          Icons.speed_rounded,
-                                        ),
-                                      if (vitals.pulse.isNotEmpty)
-                                        _buildVitalBadge(
-                                          'Pulse',
-                                          '${vitals.pulse} bpm',
-                                          _getPulseColor(vitals.pulse),
-                                          Icons.favorite_rounded,
-                                        ),
-                                      if (vitals.temperature.isNotEmpty)
-                                        _buildVitalBadge(
-                                          'Temp',
-                                          '${vitals.temperature}°F',
-                                          _getTempColor(vitals.temperature),
-                                          Icons.thermostat_rounded,
-                                        ),
-                                      if (vitals.spo2.isNotEmpty)
-                                        _buildVitalBadge(
-                                          'SpO2',
-                                          '${vitals.spo2}%',
-                                          _getSpO2Color(vitals.spo2),
-                                          Icons.air_rounded,
-                                        ),
-                                      if (vitals.weight.isNotEmpty)
-                                        _buildVitalBadge(
-                                          'Weight',
-                                          '${vitals.weight} kg',
-                                          AppTheme.primaryTeal,
-                                          Icons.monitor_weight_rounded,
-                                        ),
-                                    ],
-                                  ),
-                                ],
-
-                                // Mobile Action Buttons
-                                if (isMobile) ...[
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.info_outline_rounded, color: AppTheme.primaryTeal),
-                                        onPressed: () {
-                                          final patient = _repository.getPatientById(item.patientId);
-                                          if (patient != null) {
-                                            PatientDetailDialog.show(context, patient);
-                                          }
-                                        },
-                                      ),
-                                      const SizedBox(width: 8),
-                                      ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: isConsulting ? AppTheme.statusCompleted : AppTheme.statusInConsultation,
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                          shape: const StadiumBorder(),
-                                        ),
-                                        onPressed: () => _openPrescriptionConsultation(item),
-                                        icon: const Icon(Icons.medical_services_rounded, size: 16),
-                                        label: Text(isConsulting ? 'Prescribe & Attend' : 'Start Prescription', style: const TextStyle(fontSize: 12)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
                         );
@@ -432,11 +420,11 @@ class _QueueViewState extends State<QueueView> {
       onSelected: (sel) {
         if (sel) setState(() => _filterMode = key);
       },
-      selectedColor: AppTheme.primaryTeal.withValues(alpha: 0.2),
+      selectedColor: AppTheme.primaryTeal.withValues(alpha: 0.12),
       labelStyle: TextStyle(
         fontSize: 12,
-        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-        color: isSelected ? AppTheme.primaryTeal : null,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected ? AppTheme.primaryTeal : Colors.grey.shade700,
       ),
     );
   }
@@ -483,26 +471,30 @@ class _QueueViewState extends State<QueueView> {
     return AppTheme.statusCompleted;
   }
 
-  Widget _buildVitalBadge(String label, String value, Color color, IconData icon) {
+  Widget _buildVitalBadge(String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 4),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 5),
           Text(
             '$label: ',
-            style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color),
           ),
         ],
       ),
@@ -512,58 +504,51 @@ class _QueueViewState extends State<QueueView> {
   Widget _buildStatusBadge(bool isConsulting, bool hasAlert) {
     final color = hasAlert ? AppTheme.accentRose : (isConsulting ? AppTheme.statusInConsultation : AppTheme.statusWaiting);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         hasAlert ? 'HIGH BP ALERT ⚠️' : (isConsulting ? 'IN CONSULTATION' : 'WAITING QUEUE'),
         style: TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
           color: color,
-          letterSpacing: 0.4,
+          letterSpacing: 0.3,
         ),
       ),
     );
   }
 
-  Widget _buildGlassStatCard(String title, String value, IconData icon, Color color, LinearGradient gradient, bool isMobile, bool isDark) {
+  Widget _buildStatCard(String title, String value, IconData icon, Color color, bool isMobile) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(isMobile ? 12 : 18),
+        padding: EdgeInsets.all(isMobile ? 12 : 16),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E293B).withValues(alpha: 0.85) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.25), width: 1.5),
-          boxShadow: [
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          boxShadow: const [
             BoxShadow(
-              color: color.withValues(alpha: 0.12),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: Color(0x060F172A),
+              blurRadius: 10,
+              offset: Offset(0, 3),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(isMobile ? 10 : 14),
+              padding: EdgeInsets.all(isMobile ? 8 : 12),
               decoration: BoxDecoration(
-                gradient: gradient,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Colors.white, size: isMobile ? 22 : 28),
+              child: Icon(icon, color: color, size: isMobile ? 20 : 24),
             ),
-            SizedBox(width: isMobile ? 10 : 16),
+            SizedBox(width: isMobile ? 8 : 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -571,10 +556,9 @@ class _QueueViewState extends State<QueueView> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
-                      fontSize: isMobile ? 11 : 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.3,
+                      color: Colors.grey.shade600,
+                      fontSize: isMobile ? 10 : 12,
+                      fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -582,9 +566,9 @@ class _QueueViewState extends State<QueueView> {
                   Text(
                     value,
                     style: TextStyle(
-                      fontSize: isMobile ? 18 : 26,
-                      fontWeight: FontWeight.w900,
-                      color: isDark ? Colors.white : AppTheme.primaryDark,
+                      fontSize: isMobile ? 18 : 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.primaryDark,
                     ),
                   ),
                 ],

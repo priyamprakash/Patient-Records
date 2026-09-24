@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/models.dart';
@@ -55,7 +54,6 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
           );
         }
 
-        final isDark = Theme.of(context).brightness == Brightness.dark;
         final waitingCount = _repository.waitingQueue.length;
         final attendedTodayCount = _repository.attendedTodayQueue.length;
         final revenueToday = _repository.todayRevenue;
@@ -77,161 +75,129 @@ class _MainLayoutState extends State<MainLayout> with SingleTickerProviderStateM
           // Clean, Full-Width Ultra-Modern App Bar
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF0F172A).withValues(alpha: 0.95) : Colors.white.withValues(alpha: 0.95),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                        width: 1,
-                      ),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark ? Colors.black26 : const Color(0xFF0F172A).withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFFE2E8F0),
+                    width: 1,
                   ),
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        // Clinic Logo Badge
-                        Container(
-                          padding: const EdgeInsets.all(9),
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.primaryTeal.withValues(alpha: 0.35),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x050F172A),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    // Clinic Logo Badge
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryTeal.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          child: const Icon(Icons.local_hospital_rounded, color: Colors.white, size: 20),
+                        ],
+                      ),
+                      child: const Icon(Icons.local_hospital_rounded, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 14),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isMobile ? 'MEDICARE' : 'MEDICARE CLINIC EMR',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                            color: AppTheme.primaryDark,
+                          ),
                         ),
-                        const SizedBox(width: 14),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Text(
+                          'Smart Clinical Practice System',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+
+                    // Live Date & System Pill (Desktop)
+                    if (!isMobile) ...[
+                      Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              isMobile ? 'MEDICARE' : 'MEDICARE CLINIC EMR',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.6,
-                                color: isDark ? Colors.white : AppTheme.primaryDark,
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: AppTheme.statusCompleted,
+                                shape: BoxShape.circle,
                               ),
                             ),
+                            const SizedBox(width: 8),
                             Text(
-                              'Smart Clinical Practice System',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade500,
+                              DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now()),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.primaryDark,
                               ),
                             ),
                           ],
                         ),
-                        const Spacer(),
+                      ),
+                    ],
 
-                        // Theme Mode Toggle Button
-                        ValueListenableBuilder<ThemeMode>(
-                          valueListenable: AppTheme.themeModeNotifier,
-                          builder: (context, mode, _) {
-                            final isDarkActive = mode == ThemeMode.dark;
-                            return Container(
-                              margin: const EdgeInsets.only(right: 10),
-                              decoration: BoxDecoration(
-                                color: isDarkActive ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: isDarkActive ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                              ),
-                              child: IconButton(
-                                tooltip: isDarkActive ? 'Switch to Light Luxury Theme' : 'Switch to Midnight Dark Theme',
-                                icon: Icon(
-                                  isDarkActive ? Icons.wb_sunny_rounded : Icons.nightlight_round,
-                                  color: isDarkActive ? Colors.amber : AppTheme.primaryDark,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  AppTheme.toggleTheme();
-                                },
-                              ),
-                            );
-                          },
-                        ),
-
-                        // Live Date & System Pill (Desktop)
-                        if (!isMobile) ...[
-                          Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                    // Reset Sample DB Button
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryDark,
+                        side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.refresh_rounded, size: 16, color: AppTheme.primaryTeal),
+                      label: Text(
+                        isMobile ? 'Reset DB' : 'Reset Sample DB',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                      onPressed: () async {
+                        await _repository.resetToFakeDatabase();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Database reset with sample patients, queue, and medicines!'),
+                              backgroundColor: AppTheme.primaryTeal,
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.statusCompleted,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now()),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : AppTheme.primaryDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-
-                        // Reset Sample DB Button
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: isDark ? Colors.white : AppTheme.primaryDark,
-                            side: BorderSide(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1), width: 1.2),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          icon: const Icon(Icons.refresh_rounded, size: 16, color: AppTheme.primaryTeal),
-                          label: Text(
-                            isMobile ? 'Reset DB' : 'Reset Sample DB',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                          ),
-                          onPressed: () async {
-                            await _repository.resetToFakeDatabase();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Database reset with sample patients, queue, and medicines!'),
-                                  backgroundColor: AppTheme.primaryTeal,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ],
+                          );
+                        }
+                      },
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),

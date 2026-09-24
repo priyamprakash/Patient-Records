@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 
@@ -9,7 +8,6 @@ class GlassCard extends StatelessWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final double borderRadius;
-  final double blurSigma;
   final VoidCallback? onTap;
 
   const GlassCard({
@@ -19,44 +17,30 @@ class GlassCard extends StatelessWidget {
     this.margin,
     this.backgroundColor,
     this.borderColor,
-    this.borderRadius = 18.0,
-    this.blurSigma = 10.0,
+    this.borderRadius = 16.0,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final bg = backgroundColor ?? (isDark 
-        ? const Color(0xFF1E293B).withValues(alpha: 0.85)
-        : Colors.white.withValues(alpha: 0.90));
-        
-    final border = borderColor ?? (isDark 
-        ? const Color(0xFF334155) 
-        : AppTheme.primaryTeal.withValues(alpha: 0.15));
+    final bg = backgroundColor ?? Colors.white;
+    final border = borderColor ?? AppTheme.borderColor;
 
-    Widget content = ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-        child: Container(
-          padding: padding ?? const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: border, width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
+    Widget content = Container(
+      padding: padding ?? const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: border, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A0F172A),
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
-          child: child,
-        ),
+        ],
       ),
+      child: child,
     );
 
     if (margin != null) {
@@ -74,4 +58,5 @@ class GlassCard extends StatelessWidget {
     return content;
   }
 }
+
 
